@@ -1,0 +1,327 @@
+EQUIPE: 
+
+Eduardo Sales Cosme
+Jairo Moreira Vasconcelos
+Felipe Carletto
+
+
+CODIGO:
+
+import java.util.*;
+
+public class Main {
+
+    public static void menu() {
+        System.out.println("\n**--MENU DO CRIADOR DE ROTAS--**\n");
+        System.out.println("********************************");
+        System.out.println("|                              |");
+        System.out.println("|    1 - Novo Cadastro         |");
+        System.out.println("|    2 - Adicionar Rota        |");
+        System.out.println("|    3 - Consultar Rota        |");
+        System.out.println("|    4 - Alterar               |");
+        System.out.println("|    5 - Excluir               |");
+        System.out.println("|    6 - Listar Cidades        |");
+        System.out.println("|    7 - Sair                  |");
+        System.out.println("|                              |");
+        System.out.println("********************************");
+        System.out.print("Digite uma opção: ");
+    }
+
+    public static void main(String[] args) {
+        Scanner usua = new Scanner(System.in);
+        Grafo grafo = new Grafo();
+        int opcao;
+
+        do {
+            menu();
+            opcao = usua.nextInt();
+            usua.nextLine(); 
+
+            switch (opcao) {
+                case 1:
+                    System.out.print("Digite o nome da cidade: ");
+                    String nome = usua.nextLine();
+                    System.out.print("Digite o estado (UF): ");
+                    String estado = usua.nextLine();
+
+                    Cidade cidade = new Cidade(nome, estado);
+                    grafo.adicionarCidade(cidade);
+
+                    System.out.print("Deseja adicionar uma rota para outra cidade existente? (s/n): ");
+                    String resposta = usua.nextLine();
+
+                    if (resposta.equalsIgnoreCase("s")) {
+                        System.out.print("Digite o nome da cidade de destino: ");
+                        String destino = usua.nextLine();
+                        System.out.print("Digite a distância entre " + nome + " e " + destino + ": ");
+                        int distancia = usua.nextInt();
+                        usua.nextLine(); 
+                        grafo.adicionarRota(nome, destino, distancia);
+                    }
+
+                    System.out.println("Cidade cadastrada com sucesso!");
+                    break;
+                case 2:{
+                    System.out.print("Digite o nome da cidade: ");
+                    nome = usua.nextLine();
+                    System.out.print("Digite o nome da cidade de destino: ");
+                    String destino = usua.nextLine();
+                    System.out.print("Digite a distância entre " + nome + " e " + destino + ": ");
+                        int distancia = usua.nextInt();
+                        usua.nextLine(); 
+                        grafo.adicionarRota(nome, destino, distancia);
+                    break;
+                }
+                case 3:
+                    System.out.print("Digite a cidade de origem: ");
+                    String origem = usua.nextLine();
+                    System.out.print("Digite a cidade de destino: ");
+                    String destino = usua.nextLine();
+
+                    List<String> caminho = grafo.meCaminho(origem, destino);
+                    int distanciaTotal = grafo.meDistancia(origem, destino);
+
+                    if (caminho.isEmpty()) {
+                        System.out.println("Rota impossível: cidades não conectadas.");
+                    } else {
+                        System.out.println("Menor rota: " + String.join(" → ", caminho));
+                        System.out.println("Distância total: " + distanciaTotal + " km");
+                    }
+                    break;
+                case 4:{
+                    
+                    System.out.print("Digite o nome da cidade que deseja alterar: ");
+                    String nomeAntigo = usua.nextLine();
+                
+                    System.out.print("Novo nome da cidade (ou o mesmo): ");
+                    String novoNome = usua.nextLine();
+                
+                    System.out.print("Novo estado (UF): ");
+                    String novoEstado = usua.nextLine();
+                
+                    grafo.alterarCidade(nomeAntigo, novoNome, novoEstado);
+                    break;
+                }    
+                case 5:{
+                    System.out.print("Digite o nome da cidade que deseja excluir: ");
+                    String nomeExcluir = usua.nextLine();
+                    grafo.excluirCidade(nomeExcluir);
+
+                    break;
+                }
+                case 6:
+                    grafo.listarCidades();
+                    break;
+
+                case 7:
+                    System.out.println("Encerrando...");
+                    break;
+
+                default:
+                    System.out.println("Opção inválida!");
+                    break;
+            }
+
+        } while (opcao != 7);
+
+        usua.close();
+    }
+}
+
+
+class Cidade {
+    private String nome;
+    private String estado;
+
+    public Cidade(String nome, String estado) {
+        this.nome = nome;
+        this.estado = estado;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void exibirDados() {
+        System.out.println("Cidade: " + nome + " (" + estado + ")");
+    }
+}
+
+
+class Grafo {
+    private Map<String, Cidade> cidades = new HashMap<>();
+    private Map<String, Map<String, Integer>> juncao = new HashMap<>();
+
+    public void adicionarCidade(Cidade cidade) {
+        String nome = cidade.getNome();
+        cidades.put(nome, cidade);
+        juncao.putIfAbsent(nome, new HashMap<>());
+    }
+
+    public void adicionarRota(String origem, String destino, int distancia) {
+        if (cidades.containsKey(origem) && cidades.containsKey(destino)) {
+            juncao.get(origem).put(destino, distancia);
+            juncao.get(destino).put(origem, distancia); 
+        } else {
+            System.out.println("Erro: uma das cidades não existe!");
+        }
+    }
+
+    public int meDistancia(String origem, String destino) {
+        if (!cidades.containsKey(origem) || !cidades.containsKey(destino)) {
+            return Integer.MAX_VALUE;
+        }
+
+        Map<String, Integer> distancias = new HashMap<>();
+        Set<String> visitados = new HashSet<>();
+        PriorityQueue<Caminho> fila = new PriorityQueue<>(Comparator.comparingInt(c -> c.distancia));
+
+        for (String cidade : cidades.keySet()) {
+            distancias.put(cidade, Integer.MAX_VALUE);
+        }
+
+        distancias.put(origem, 0);
+        fila.add(new Caminho(origem, 0));
+
+        while (!fila.isEmpty()) {
+            Caminho atual = fila.poll();
+            if (visitados.contains(atual.nome)) continue;
+            visitados.add(atual.nome);
+
+            for (Map.Entry<String, Integer> vizinho : juncao.getOrDefault(atual.nome, new HashMap<>()).entrySet()) {
+                int novaDistancia = distancias.get(atual.nome) + vizinho.getValue();
+                if (novaDistancia < distancias.get(vizinho.getKey())) {
+                    distancias.put(vizinho.getKey(), novaDistancia);
+                    fila.add(new Caminho(vizinho.getKey(), novaDistancia));
+                }
+            }
+        }
+
+        return distancias.getOrDefault(destino, Integer.MAX_VALUE);
+    }
+
+    public List<String> meCaminho(String origem, String destino) {
+        if (!cidades.containsKey(origem) || !cidades.containsKey(destino)) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Integer> distancias = new HashMap<>();
+        Map<String, String> anteriores = new HashMap<>();
+        Set<String> visitados = new HashSet<>();
+        PriorityQueue<Caminho> fila = new PriorityQueue<>(Comparator.comparingInt(c -> c.distancia));
+
+        for (String cidade : cidades.keySet()) {
+            distancias.put(cidade, Integer.MAX_VALUE);
+        }
+
+        distancias.put(origem, 0);
+        fila.add(new Caminho(origem, 0));
+
+        while (!fila.isEmpty()) {
+            Caminho atual = fila.poll();
+            if (visitados.contains(atual.nome)) continue;
+            visitados.add(atual.nome);
+
+            for (Map.Entry<String, Integer> vizinho : juncao.getOrDefault(atual.nome, new HashMap<>()).entrySet()) {
+                int novaDistancia = distancias.get(atual.nome) + vizinho.getValue();
+                if (novaDistancia < distancias.get(vizinho.getKey())) {
+                    distancias.put(vizinho.getKey(), novaDistancia);
+                    anteriores.put(vizinho.getKey(), atual.nome);
+                    fila.add(new Caminho(vizinho.getKey(), novaDistancia));
+                }
+            }
+        }
+
+        
+        List<String> caminho = new LinkedList<>();
+        String atual = destino;
+        while (atual != null && anteriores.containsKey(atual)) {
+            caminho.add(0, atual);
+            atual = anteriores.get(atual);
+        }
+
+        if (atual == null && !origem.equals(destino)) {
+            return new ArrayList<>(); 
+        }
+
+        caminho.add(0, origem);
+        return caminho;
+    }
+
+    public void listarCidades() {
+        if (cidades.isEmpty()) {
+            System.out.println("Nenhuma cidade cadastrada.");
+            return;
+        }
+
+        for (Cidade c : cidades.values()) {
+            c.exibirDados();
+            System.out.println("---------------------------");
+        }
+    }
+
+    private class Caminho {
+        String nome;
+        int distancia;
+
+        Caminho(String nome, int distancia) {
+            this.nome = nome;
+            this.distancia = distancia;
+        }
+    }
+    
+    public void excluirCidade(String nome) {
+    if (!cidades.containsKey(nome)) {
+        System.out.println("Cidade \"" + nome + "\" não encontrada.");
+        return;
+    }
+
+    
+    cidades.remove(nome);
+
+    
+    for (Map<String, Integer> vizinhos : juncao.values()) {
+        vizinhos.remove(nome);
+    }
+
+    
+    juncao.remove(nome);
+
+    System.out.println("Cidade \"" + nome + "\" excluída com sucesso.");
+    }
+  public void alterarCidade(String nomeAntigo, String novoNome, String novoEstado) {
+    if (!cidades.containsKey(nomeAntigo)) {
+        System.out.println("Cidade \"" + nomeAntigo + "\" não encontrada.");
+        return;
+    }
+
+    
+    if (!nomeAntigo.equals(novoNome)) {
+        if (cidades.containsKey(novoNome)) {
+            System.out.println("Já existe uma cidade com o nome \"" + novoNome + "\".");
+            return;
+        }
+
+        Cidade cidade = cidades.remove(nomeAntigo); 
+        Cidade novaCidade = new Cidade(novoNome, novoEstado);
+        cidades.put(novoNome, novaCidade);
+
+        Map<String, Integer> rotas = juncao.remove(nomeAntigo);
+        juncao.put(novoNome, rotas);
+
+        for (Map<String, Integer> vizinhos : juncao.values()) {
+            if (vizinhos.containsKey(nomeAntigo)) {
+                int distancia = vizinhos.remove(nomeAntigo);//
+                vizinhos.put(novoNome, distancia);
+            }
+        }
+    } else {
+        Cidade cidade = cidades.get(nomeAntigo);
+        Cidade cidadeAtualizada = new Cidade(nomeAntigo, novoEstado);
+        cidades.put(nomeAntigo, cidadeAtualizada);
+    }
+
+    System.out.println("Cidade atualizada com sucesso.");
+}
+
+}
