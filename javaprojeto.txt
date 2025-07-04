@@ -24,7 +24,7 @@ public class Main {
         System.out.println("|    7 - Sair                  |");
         System.out.println("|                              |");
         System.out.println("********************************");
-        System.out.print("Digite uma opção: ");
+        System.out.print("Digite uma opcao: ");
     }
 
     public static void main(String[] args) {
@@ -53,7 +53,7 @@ public class Main {
                     if (resposta.equalsIgnoreCase("s")) {
                         System.out.print("Digite o nome da cidade de destino: ");
                         String destino = usua.nextLine();
-                        System.out.print("Digite a distância entre " + nome + " e " + destino + ": ");
+                        System.out.print("Digite a distancia entre " + nome + " e " + destino + ": ");
                         int distancia = usua.nextInt();
                         usua.nextLine(); 
                         grafo.adicionarRota(nome, destino, distancia);
@@ -66,7 +66,7 @@ public class Main {
                     nome = usua.nextLine();
                     System.out.print("Digite o nome da cidade de destino: ");
                     String destino = usua.nextLine();
-                    System.out.print("Digite a distância entre " + nome + " e " + destino + ": ");
+                    System.out.print("Digite a distancia entre " + nome + " e " + destino + ": ");
                         int distancia = usua.nextInt();
                         usua.nextLine(); 
                         grafo.adicionarRota(nome, destino, distancia);
@@ -82,10 +82,10 @@ public class Main {
                     int distanciaTotal = grafo.meDistancia(origem, destino);
 
                     if (caminho.isEmpty()) {
-                        System.out.println("Rota impossível: cidades não conectadas.");
+                        System.out.println("Rota impossivel: cidades não conectadas.");
                     } else {
                         System.out.println("Menor rota: " + String.join(" → ", caminho));
-                        System.out.println("Distância total: " + distanciaTotal + " km");
+                        System.out.println("Distancia total: " + distanciaTotal + " km");
                     }
                     break;
                 case 4:{
@@ -118,7 +118,7 @@ public class Main {
                     break;
 
                 default:
-                    System.out.println("Opção inválida!");
+                    System.out.println("Opção invalida!");
                     break;
             }
 
@@ -163,7 +163,7 @@ class Grafo {
             juncao.get(origem).put(destino, distancia);
             juncao.get(destino).put(origem, distancia); 
         } else {
-            System.out.println("Erro: uma das cidades não existe!");
+            System.out.println("Erro: uma das cidades nao existe!");
         }
     }
 
@@ -272,7 +272,7 @@ class Grafo {
     
     public void excluirCidade(String nome) {
     if (!cidades.containsKey(nome)) {
-        System.out.println("Cidade \"" + nome + "\" não encontrada.");
+        System.out.println("Cidade \"" + nome + "\" nao encontrada.");
         return;
     }
 
@@ -287,18 +287,18 @@ class Grafo {
     
     juncao.remove(nome);
 
-    System.out.println("Cidade \"" + nome + "\" excluída com sucesso.");
+    System.out.println("Cidade \"" + nome + "\" excluida com sucesso.");
     }
   public void alterarCidade(String nomeAntigo, String novoNome, String novoEstado) {
     if (!cidades.containsKey(nomeAntigo)) {
-        System.out.println("Cidade \"" + nomeAntigo + "\" não encontrada.");
+        System.out.println("Cidade \"" + nomeAntigo + "\" nao encontrada.");
         return;
     }
 
     
     if (!nomeAntigo.equals(novoNome)) {
         if (cidades.containsKey(novoNome)) {
-            System.out.println("Já existe uma cidade com o nome \"" + novoNome + "\".");
+            System.out.println("Ja existe uma cidade com o nome \"" + novoNome + "\".");
             return;
         }
 
